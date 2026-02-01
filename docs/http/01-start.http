@@ -1,0 +1,5 @@
+### Start a new image set job (returns jobId)
+POST http://localhost:7071/api/StartImageSet
+Content-Type: application/json
+
+{}
