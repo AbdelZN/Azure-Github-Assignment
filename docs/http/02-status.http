@@ -1,6 +1,5 @@
 # @baseUrl = http://localhost:7071
 @baseUrl = https://ccd-func-otpo3ptm46ydu.azurewebsites.net
-@code = FNiCCU0gFFyqH00qduX5yC_2PVQQrqnkO7tzwBaONPKLAzFuipmMrQ==
 
 ### Get status for a jobId
 @jobId = e7fd71de-b7de-400a-a1a1-dde836192d47
