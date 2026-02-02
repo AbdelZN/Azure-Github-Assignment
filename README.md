@@ -20,6 +20,16 @@ Local base URL:
 Azure base URL:
 - https://ccd-func-otpo3ptm46ydu.azurewebsites.net
 
+### Authentication (Azure)
+All Azure HTTP endpoints use `AuthorizationLevel.Function` and require a function key.
+
+Add `code=<FUNCTION_KEY>` as a query parameter:
+- Start: `POST /api/StartImageSet?code=<FUNCTION_KEY>`
+- Status: `GET /api/GetStatus?jobId=<JOB_ID>&code=<FUNCTION_KEY>`
+- Results: `GET /api/GetResults?jobId=<JOB_ID>&code=<FUNCTION_KEY>`
+
+The function key is provided to the teacher separately (not stored in this repository).
+
 ### Start a job
 - Method: POST
 - Path: /api/StartImageSet
@@ -39,12 +49,17 @@ Azure base URL:
 - Response example:
   { "jobId": "...", "results": [ "https://.../images/{jobId}/station-....jpg", ... ] }
 
+## Blob access (SAS)
+The blob container is private. `GetResults` returns time-limited SAS URLs for each generated image so the images can be opened without making the container public.
+
 ## HTTP files (API documentation)
 
 Request examples are included in:
 - docs/http/01-start.http
 - docs/http/02-status.http
 - docs/http/03-results.http
+
+Note: the HTTP files contain placeholders for the function key. The key must be provided separately.
 
 ## Data sources
 
@@ -94,6 +109,11 @@ The script:
 2. Publishes the Functions app using dotnet publish.
 3. Deploys using Azure CLI zip deployment.
 
+## CI/CD (GitHub Actions)
+
+A GitHub Actions workflow is configured to build and deploy the Azure Functions app automatically on pushes to `main`.
+(It deploys code using an Azure publish profile secret. Infrastructure changes are handled via `deploy.ps1`.)
+
 ## Repository contents
 
 - src/Functions/          Azure Functions (.NET isolated)
@@ -101,8 +121,9 @@ The script:
 - deploy.ps1              Publish + provision + deploy script
 - docs/http/              HTTP files for API documentation
 
-## Requirements mapping (Must)
+## Requirements mapping
 
+### Must
 - Public HTTP API to start image generation: StartImageSet
 - QueueTrigger background processing: FanOut + ProcessStation
 - Blob Storage to store and expose generated images
@@ -113,3 +134,8 @@ The script:
 - Bicep template including queues: infra/main.bicep
 - deploy.ps1 using dotnet CLI + Azure CLI: deploy.ps1
 - Deployed to Azure and working endpoints
+
+### Could (implemented)
+- SAS URLs returned instead of public blob container access
+- Build and deploy automatically from GitHub (GitHub Actions)
+- Authentication on request API (Function key)

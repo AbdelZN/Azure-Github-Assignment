@@ -1,8 +1,8 @@
 # @baseUrl = http://localhost:7071
 @baseUrl = https://ccd-func-otpo3ptm46ydu.azurewebsites.net
+@code = <FUNCTION_KEY>
+### Get status for a jobId
+@jobId = bc626701-9b40-4e84-82ef-e4869ad0abae
 
 ### Get status for a jobId
-@jobId = e7fd71de-b7de-400a-a1a1-dde836192d47
-
-### Get status for a jobId
-GET {{baseUrl}}/api/GetStatus?jobId={{jobId}}
+GET {{baseUrl}}/api/GetStatus?jobId={{jobId}}&code={{code}}
