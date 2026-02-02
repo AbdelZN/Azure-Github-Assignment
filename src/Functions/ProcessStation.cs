@@ -63,7 +63,7 @@ public class ProcessStation
         var imageUrl = "https://picsum.photos/800/500";
         var imageBytes = await _http.GetByteArrayAsync(imageUrl);
 
-        // Build overlay text
+        // Builds overlay text
         var lines = new List<string>
         {
             $"{stationName} ({stationId})",
@@ -75,10 +75,10 @@ public class ProcessStation
 
         var overlayText = string.Join("\n", lines.Where(l => !string.IsNullOrWhiteSpace(l)));
 
-        // Edit image in memory
+        // Edits image in memory
         using var image = Image.Load(imageBytes);
 
-        // Choose a font (system fonts may be limited, so use a built-in fallback)
+        // Chooses a font (system fonts may be limited, so use a built-in fallback)
         Font font;
         try
         {
@@ -91,17 +91,17 @@ public class ProcessStation
 
         image.Mutate(ctx =>
         {
-            // Draw a simple black shadow + white text for readability
+            // Draws a simple black shadow + white text for readability
             ctx.DrawText(overlayText, font, Color.Black, new PointF(21, 21));
             ctx.DrawText(overlayText, font, Color.White, new PointF(20, 20));
         });
 
-        // Encode to JPEG bytes
+        // Encodes to JPEG bytes
         await using var outStream = new MemoryStream();
         await image.SaveAsync(outStream, new JpegEncoder { Quality = 85 });
         outStream.Position = 0;
 
-        // Upload edited image
+        // Uploads edited image
         var blobName = $"{jobId}/station-{stationId}.jpg";
         var blob = container.GetBlobClient(blobName);
 

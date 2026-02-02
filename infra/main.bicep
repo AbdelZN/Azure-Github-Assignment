@@ -24,7 +24,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   kind: 'StorageV2'
   properties: {
     minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: true // you can switch to false later and use SAS (Could)
+    allowBlobPublicAccess: false 
     supportsHttpsTrafficOnly: true
   }
 }
@@ -36,7 +36,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01'
 resource imagesContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   name: '${storage.name}/default/${blobContainerName}'
   properties: {
-    publicAccess: 'Blob' // public blob URLs (Must). Later you can do SAS instead.
+    publicAccess: 'None'
   }
   dependsOn: [ blobService ]
 }

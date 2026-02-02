@@ -6,6 +6,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using Azure.Storage;
+using Azure.Storage.Sas;
 
 namespace Functions;
 
@@ -45,11 +47,56 @@ public class GetResults
             prefix: $"{jobId}/",
             cancellationToken: default))
         {
-            urls.Add(container.GetBlobClient(item.Name).Uri.ToString());
+            var blobClient = container.GetBlobClient(item.Name);
+            if (conn != null && conn.Contains("UseDevelopmentStorage=true", StringComparison.OrdinalIgnoreCase))
+            {
+                // Local/Azurite: no SAS
+                urls.Add(blobClient.Uri.ToString());
+            }
+            else
+            {
+                // Azure: return SAS URL
+                urls.Add(BuildBlobReadSasUrl(blobClient, conn!, TimeSpan.FromHours(1)));
+            }
         }
 
         response.StatusCode = HttpStatusCode.OK;
         await response.WriteAsJsonAsync(new { jobId, results = urls });
         return response;
+    }
+
+    private static string BuildBlobReadSasUrl(BlobClient blobClient, string connectionString, TimeSpan validFor)
+    {
+        // Parse connection string for AccountName + AccountKey
+        string? accountName = null;
+        string? accountKey = null;
+
+        foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var kv = part.Split('=', 2);
+            if (kv.Length != 2) continue;
+
+            if (kv[0].Equals("AccountName", StringComparison.OrdinalIgnoreCase)) accountName = kv[1];
+            if (kv[0].Equals("AccountKey", StringComparison.OrdinalIgnoreCase)) accountKey = kv[1];
+        }
+
+        if (string.IsNullOrWhiteSpace(accountName) || string.IsNullOrWhiteSpace(accountKey))
+            throw new InvalidOperationException("AzureWebJobsStorage must be a full connection string with AccountName and AccountKey to create SAS URLs.");
+
+        var credential = new StorageSharedKeyCredential(accountName, accountKey);
+
+        var sasBuilder = new BlobSasBuilder
+        {
+            BlobContainerName = blobClient.BlobContainerName,
+            BlobName = blobClient.Name,
+            Resource = "b",
+            StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+            ExpiresOn = DateTimeOffset.UtcNow.Add(validFor)
+        };
+
+        sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+        var sas = sasBuilder.ToSasQueryParameters(credential).ToString();
+        return $"{blobClient.Uri}?{sas}";
     }
 }

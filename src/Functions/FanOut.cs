@@ -39,7 +39,7 @@ public class FanOut
         {
             if (outputs.Count >= 50) break;
 
-            // Known fields from your sample JSON
+            // Known fields from public JSON
             var stationId = station.GetProperty("stationid").GetInt32().ToString();
             var stationName = station.GetProperty("stationname").GetString() ?? "unknown";
             var temperature = station.TryGetProperty("temperature", out var t) && t.ValueKind == JsonValueKind.Number ? t.GetDouble() : (double?)null;
@@ -65,7 +65,7 @@ public class FanOut
             }));
         }
 
-        // Pad to 50 (because feed often has ~40 measurement stations)
+        // Pads to 50 (because feed often has ~40 measurement stations)
         if (outputs.Count > 0 && outputs.Count < 50)
         {
             _logger.LogWarning("Buienradar returned {count} stations; padding to 50 by repeating stations.", outputs.Count);
@@ -128,7 +128,7 @@ public class FanOut
             // Some feeds represent "integer-ish" values as 95.0 etc.
             if (el.TryGetInt32(out var i)) return i;
 
-            // Fall back to double -> int conversion
+            // Falls back to double -> int conversion
             var d = el.GetDouble();
             return (int)Math.Round(d);
         }
@@ -138,7 +138,7 @@ public class FanOut
             var s = el.GetString();
             if (int.TryParse(s, out var i)) return i;
 
-            // Handle "95.0" as string too
+            // Handles "95.0" as string too
             if (double.TryParse(s, System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out var d))
                 return (int)Math.Round(d);

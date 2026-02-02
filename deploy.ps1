@@ -44,3 +44,7 @@ Write-Host "Test endpoints after deploy:"
 Write-Host "  https://$functionAppName.azurewebsites.net/api/StartImageSet"
 Write-Host "  https://$functionAppName.azurewebsites.net/api/GetStatus?jobId=<jobId>"
 Write-Host "  https://$functionAppName.azurewebsites.net/api/GetResults?jobId=<jobId>"
+
+# Optional cleanup
+if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
+if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
