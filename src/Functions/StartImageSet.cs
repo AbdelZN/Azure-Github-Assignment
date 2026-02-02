@@ -24,7 +24,7 @@ public class StartImageSet
 
     [Function("StartImageSet")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
     {
         var jobId = Guid.NewGuid().ToString();
         _logger.LogInformation("StartImageSet created jobId: {jobId}", jobId);

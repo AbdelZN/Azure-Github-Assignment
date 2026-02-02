@@ -10,7 +10,7 @@ public class GetStatus
 {
     [Function("GetStatus")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
     {
         var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
         var jobId = query["jobId"];
